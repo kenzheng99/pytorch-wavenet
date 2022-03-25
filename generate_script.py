@@ -2,14 +2,19 @@ import librosa
 from wavenet_model import *
 from audio_data import WavenetDataset
 from wavenet_training import *
+import soundfile as sf
+import sys
 
-model = load_latest_model_from('snapshots', use_cuda=False)
+wavname = sys.argv[1]
+print(wavname)
+
+model, filename = load_latest_model_from('snapshots', use_cuda=False)
 
 print('model: ', model)
 print('receptive field: ', model.receptive_field)
 print('parameter count: ', model.parameter_count())
 
-data = WavenetDataset(dataset_file='train_samples/bach_chaconne/dataset.npz',
+data = WavenetDataset(dataset_file='train_samples/apple_loops/dataset.npz',
                       item_length=model.receptive_field + model.output_length - 1,
                       target_length=model.output_length,
                       file_location='train_samples/bach_chaconne',
@@ -32,4 +37,6 @@ generated = model.generate_fast(num_samples=16000,
                                  regularize=0.)
 
 print(generated)
-librosa.output.write_wav('latest_generated_clip.wav', generated, sr=16000)
+
+print('model: ', filename)
+sf.write(f'generated_samples/{wavname}.wav', generated, 16000)

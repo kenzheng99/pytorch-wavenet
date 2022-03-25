@@ -334,15 +334,14 @@ def load_latest_model_from(location, use_cuda=True):
     newest_file = max(files, key=os.path.getctime)
     print("load model " + newest_file)
 
-    if use_cuda:
-        model = torch.load(newest_file)
-    else:
-        model = load_to_cpu(newest_file)
+    model = WaveNetModel(layers=10,
+                         blocks=3,
+                         dilation_channels=32,
+                         residual_channels=32,
+                         skip_channels=1024,
+                         end_channels=512,
+                         output_length=16,
+                         bias=True)
+    model.load_state_dict(torch.load(newest_file, map_location='cpu'))
+    return model, newest_file
 
-    return model
-
-
-def load_to_cpu(path):
-    model = torch.load(path, map_location=lambda storage, loc: storage)
-    model.cpu()
-    return model

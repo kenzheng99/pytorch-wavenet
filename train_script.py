@@ -35,10 +35,10 @@ print('model: ', model)
 print('receptive field: ', model.receptive_field)
 print('parameter count: ', model.parameter_count())
 
-data = WavenetDataset(dataset_file='train_samples/bach_chaconne/dataset.npz',
+data = WavenetDataset(dataset_file='train_samples/apple_loops/dataset.npz',
                       item_length=model.receptive_field + model.output_length - 1,
                       target_length=model.output_length,
-                      file_location='train_samples/bach_chaconne',
+                      file_location='',
                       test_stride=500)
 print('the dataset has ' + str(len(data)) + ' items')
 
@@ -61,18 +61,17 @@ def generate_and_log_samples(step):
     print("audio clips generated")
 
 
-logger = TensorboardLogger(log_interval=200,
-                           validation_interval=400,
-                           generate_interval=800,
-                           generate_function=generate_and_log_samples,
-                           log_dir="logs/chaconne_model")
+logger = Logger(log_interval=200,
+                validation_interval=400,
+                generate_interval=800,
+                generate_function=generate_and_log_samples)
 
 trainer = WavenetTrainer(model=model,
                          dataset=data,
                          lr=0.0001,
                          weight_decay=0.0,
                          snapshot_path='snapshots',
-                         snapshot_name='chaconne_model',
+                         snapshot_name='apple_model',
                          snapshot_interval=1000,
                          logger=logger,
                          dtype=dtype,

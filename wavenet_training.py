@@ -55,7 +55,7 @@ class WavenetTrainer:
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
                                                       batch_size=batch_size,
                                                       shuffle=True,
-                                                      num_workers=8,
+                                                      num_workers=1,
                                                       pin_memory=False)
         step = continue_training_at_step
         for current_epoch in range(epochs):
@@ -69,7 +69,7 @@ class WavenetTrainer:
                 loss = F.cross_entropy(output.squeeze(), target.squeeze())
                 self.optimizer.zero_grad()
                 loss.backward()
-                loss = loss.data[0]
+                loss = loss.item()
 
                 if self.clip is not None:
                     torch.nn.utils.clip_grad_norm(self.model.parameters(), self.clip)
@@ -85,7 +85,8 @@ class WavenetTrainer:
                     if self.snapshot_path is None:
                         continue
                     time_string = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
-                    torch.save(self.model, self.snapshot_path + '/' + self.snapshot_name + '_' + time_string)
+                    torch.save(self.model.state_dict(), self.snapshot_path + '/' + self.snapshot_name + '_' + time_string + '.pth')
+                    print('saved model')
 
                 self.logger.log(step, loss)
 
@@ -104,7 +105,7 @@ class WavenetTrainer:
 
             predictions = torch.max(output, 1)[1].view(-1)
             correct_pred = torch.eq(target, predictions)
-            accurate_classifications += torch.sum(correct_pred).data[0]
+            accurate_classifications += torch.sum(correct_pred).item()
         # print("validate model with " + str(len(self.dataloader.dataset)) + " samples")
         # print("average loss: ", total_loss / len(self.dataloader))
         avg_loss = total_loss / len(self.dataloader)
